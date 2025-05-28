@@ -1,5 +1,13 @@
 # MBA
 
+## Dependencias
+
+### Instalar UV:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
 ## Para inicializar
 
 ```bash
