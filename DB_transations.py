@@ -1,6 +1,4 @@
-
 import pandas as pd
-import numpy as np
 import random
 from datetime import datetime, timedelta
 from uuid import uuid4
@@ -34,6 +32,7 @@ municipios_coords = {
     "Fortaleza": (-3.7172, -38.5433),
 }
 
+
 # Função para gerar transações por cliente
 def gerar_transacoes_para_cliente(cliente, total_transacoes):
     transacoes = []
@@ -52,7 +51,9 @@ def gerar_transacoes_para_cliente(cliente, total_transacoes):
         data = datetime.now() - timedelta(days=dias_atras)
 
         if suspeita:
-            hora = random.choice(list(range(0, padrao["inicio"])) + list(range(padrao["fim"] + 1, 24)))
+            hora = random.choice(
+                list(range(0, padrao["inicio"])) + list(range(padrao["fim"] + 1, 24))
+            )
         else:
             hora = random.randint(padrao["inicio"], padrao["fim"])
         minuto = random.randint(0, 59)
@@ -65,28 +66,36 @@ def gerar_transacoes_para_cliente(cliente, total_transacoes):
             valor = random.uniform(padrao["min"], padrao["max"])
         valor = round(valor, 2)
 
-        transacoes.append({
-            "id_transacao": str(uuid4()),
-            "id_cliente": cliente["id_cliente"],
-            "data_hora": data_hora.strftime("%Y-%m-%d %H:%M:%S"),
-            "valor_transacao": valor,
-            "forma_pagamento": random.choice(formas_pagamento),
-            "parcelas": random.randint(1, 12),
-            "bandeira_cartao": random.choice(bandeiras),
-            "status_transacao": random.choices(status_transacao, weights=[0.94, 0.03, 0.03])[0],
-            "latitude": base_lat + random.uniform(-0.01, 0.01),
-            "longitude": base_lon + random.uniform(-0.01, 0.01),
-            "suspeita": 1 if suspeita else 0,
-            "regiao_fronteira": 1 if cliente["fronteira"] == "Sim" else 0
-        })
+        transacoes.append(
+            {
+                "id_transacao": str(uuid4()),
+                "id_cliente": cliente["id_cliente"],
+                "data_hora": data_hora.strftime("%Y-%m-%d %H:%M:%S"),
+                "valor_transacao": valor,
+                "forma_pagamento": random.choice(formas_pagamento),
+                "parcelas": random.randint(1, 12),
+                "bandeira_cartao": random.choice(bandeiras),
+                "status_transacao": random.choices(
+                    status_transacao, weights=[0.94, 0.03, 0.03]
+                )[0],
+                "latitude": base_lat + random.uniform(-0.01, 0.01),
+                "longitude": base_lon + random.uniform(-0.01, 0.01),
+                "suspeita": 1 if suspeita else 0,
+                "regiao_fronteira": 1 if cliente["fronteira"] == "Sim" else 0,
+            }
+        )
     print(f"Transacoes: {transacoes}")
     return transacoes
+
 
 # Gerar em blocos
 def gerar_transacoes_em_blocos(df_clientes, bloco_tamanho=1000):
     todas_transacoes = []
     total_clientes = df_clientes.shape[0]
-    blocos = [df_clientes.iloc[i:i + bloco_tamanho] for i in range(0, total_clientes, bloco_tamanho)]
+    blocos = [
+        df_clientes.iloc[i : i + bloco_tamanho]
+        for i in range(0, total_clientes, bloco_tamanho)
+    ]
 
     for bloco in blocos:
         print(f"Rodando bloco: {bloco}")
@@ -97,10 +106,3 @@ def gerar_transacoes_em_blocos(df_clientes, bloco_tamanho=1000):
         todas_transacoes.extend(bloco_transacoes)
 
     return pd.DataFrame(todas_transacoes)
-
-
-df_clientes_5000 = pd.read_csv("/var/home/talita/Documents/MBA/base_clientes_maquininha_5000.csv")
-
-# Gerar as transações para os 5000 clientes
-df_transacoes_5000 = gerar_transacoes_em_blocos(df_clientes_5000, bloco_tamanho=1000)
-df_transacoes_5000.to_csv("/var/home/talita/Documents/MBA/base_transactions_maquininha_5000.csv", index=False)
